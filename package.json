@@ -1,0 +1,40 @@
+{
+  "name": "gx-m400-configurator",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@hookform/resolvers": "^5.2.2",
+    "@mui/icons-material": "^6.5.0",
+    "@mui/material": "^6.1.0",
+    "@react-oauth/google": "^0.12.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "google-auth-library": "^9.15.1",
+    "googleapis": "^139.0.0",
+    "i18next": "^23.10.1",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.2",
+    "qrcode": "^1.5.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.5",
+    "xlsx": "^0.18.5",
+    "zod": "^3.22.4",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.67",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.6.2",
+    "vite": "^5.0.8"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "id": "ModbusRTU",
+      "name": "Modbus RTU (RS-485)"
+    },
+    {
+      "id": "ModbusTCP",
+      "name": "Modbus TCP/IP (Ethernet)"
+    },
+    {
+      "id": "Profibus",
+      "name": "Profibus DP"
+    },
+    {
+      "id": "EthernetIP",
+      "name": "Ethernet/IP"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "id": "B-iso685",
+      "name": "Bender iso685 (IMD)",
+      "interfaces": [
+        "ModbusTCP",
+        "EthernetIP"
+      ]
+    },
+    {
+      "id": "B-IRDH575",
+      "name": "Bender IRDH575 (IMD)",
+      "interfaces": [
+        "ModbusRTU"
+      ]
+    }
+  ]
+}
