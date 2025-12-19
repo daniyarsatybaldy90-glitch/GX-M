@@ -469,10 +469,28 @@ export default function ConfiguratorForm(){
         <Typography variant="h6">Кабельные вводы и отходящие линии</Typography>
         <Stack direction={{ xs:'column', sm:'row' }} spacing={2}>
           <Controller name="enclosure.inlets" control={control} render={({ field })=>(
-            <TextField type="number" label="Количество вводов питания (входных линий)" inputProps={{ min:1, max:10 }} {...field} fullWidth sx={{ minWidth: 200 }} />
+            <TextField 
+              type="number" 
+              label="Количество вводов питания (входных линий)" 
+              inputProps={{ min:1, max:10 }} 
+              {...field}
+              value={field.value || ''}
+              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+              fullWidth 
+              sx={{ minWidth: 200 }} 
+            />
           )}/>
           <Controller name="cabling.inputLines" control={control} render={({ field })=>(
-            <TextField type="number" label="Количество отходящих линий" inputProps={{ min:0, max:10 }} {...field} fullWidth sx={{ minWidth: 200 }} />
+            <TextField 
+              type="number" 
+              label="Количество отходящих линий" 
+              inputProps={{ min:0, max:10 }} 
+              {...field}
+              value={field.value || ''}
+              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+              fullWidth 
+              sx={{ minWidth: 200 }} 
+            />
           )}/>
           <Controller name="cabling.cableEntries" control={control} render={({ field })=>(
             <TextField label="Кабельные вводы (тип и количество сальников)" placeholder="Например: М20x1.5 (2 шт.)" {...field} fullWidth sx={{ minWidth: 250 }} />
@@ -499,7 +517,16 @@ export default function ConfiguratorForm(){
           )}/>
           
           <Controller name="controls.auxContacts" control={control} render={({ field })=>(
-            <TextField type="number" label="Доп. контакты (шт.)" inputProps={{ min:0, max:8 }} {...field} fullWidth sx={{ minWidth: 150 }} />
+            <TextField 
+              type="number" 
+              label="Доп. контакты (шт.)" 
+              inputProps={{ min:0, max:8 }} 
+              {...field}
+              value={field.value || ''}
+              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+              fullWidth 
+              sx={{ minWidth: 150 }} 
+            />
           )}/>
         </Stack>
 
