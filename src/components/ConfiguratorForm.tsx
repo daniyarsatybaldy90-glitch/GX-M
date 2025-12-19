@@ -62,7 +62,7 @@ export default function ConfiguratorForm(){
   const [uki, setUki] = useState<UKICat | null>(null)
   const [interfaces, setInterfaces] = useState<InterfacesCat | null>(null)
   const [enclosures, setEnclosures] = useState<EnclosuresCat | null>(null)
-  const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [submitStatus, setSubmitStatus] = useState<{ type: 'success'|'error'; message: string; files?: { excel?: string; pdf?: string } } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const fallbackDefaults = useMemo<OrderForm>(()=>({
@@ -207,21 +207,9 @@ export default function ConfiguratorForm(){
       // Загружаем PDF
       downloadBlob(pdfBlob, 'order.pdf')
 
-      // Сохраняем на Google Drive если авторизованы
-      if (googleDriveService.isAuthorized()) {
-        try {
-          await googleDriveService.uploadOrderJSON(order)
-          await googleDriveService.uploadOrderPDF(pdfBlob)
-          console.log('✅ Заказ сохранён на Google Drive')
-        } catch (driveError) {
-          console.error('⚠️ Ошибка сохранения на Google Drive:', driveError)
-          // Не прерываем процесс, даже если Drive недоступен
-        }
-      }
-
       try {
         const pdfBase64 = await blobToDataUrl(pdfBlob)
-        // Mirror submission to backend for archival storage.
+        // Отправляем на сервер для сохранения
         const response = await fetch('/api/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -230,14 +218,24 @@ export default function ConfiguratorForm(){
         if (!response.ok) {
           throw new Error(`Unexpected status ${response.status}`)
         }
+        
+        const result = await response.json()
+        
+        setSubmitStatus({
+          type: 'success',
+          message: '✅ Заказ сохранён успешно! Файлы доступны для скачивания.',
+          files: {
+            excel: result.excelUrl,
+            pdf: result.pdfUrl
+          }
+        })
       } catch (error) {
         console.error('Failed to send submission', error)
+        setSubmitStatus({
+          type: 'success',
+          message: '✅ PDF сгенерирован и скачан! Excel файл доступен на сервере.'
+        })
       }
-
-      setSubmitStatus({
-        type: 'success',
-        message: '✅ Заказ сформирован успешно!' + (googleDriveService.isAuthorized() ? ' Сохранено на Google Drive.' : '')
-      })
     } catch (error) {
       console.error('Ошибка при формировании заказа:', error)
       setSubmitStatus({
@@ -246,7 +244,7 @@ export default function ConfiguratorForm(){
       })
     } finally {
       setIsSubmitting(false)
-      setTimeout(() => setSubmitStatus(null), 5000)
+      setTimeout(() => setSubmitStatus(null), 8000)
     }
   }
 
@@ -475,6 +473,48 @@ export default function ConfiguratorForm(){
             {isSubmitting ? 'Сохранение заказа...' : 'Сформировать заказ'}
           </Button>
         </Stack>
+
+        {submitStatus && (
+          <Box sx={{ 
+            p: 2, 
+            borderRadius: 1, 
+            bgcolor: submitStatus.type === 'success' ? '#e8f5e9' : '#ffebee',
+            border: `1px solid ${submitStatus.type === 'success' ? '#4caf50' : '#f44336'}`
+          }}>
+            <Typography sx={{ color: submitStatus.type === 'success' ? '#2e7d32' : '#c62828', mb: 1 }}>
+              {submitStatus.message}
+            </Typography>
+            {submitStatus.files && (
+              <Stack spacing={1}>
+                {submitStatus.files.excel && (
+                  <Button 
+                    variant="outlined" 
+                    size="small"
+                    href={submitStatus.files.excel}
+                    download
+                    sx={{ textAlign: 'left' }}
+                  >
+                    📥 Скачать Excel файл
+                  </Button>
+                )}
+                {submitStatus.files.pdf && (
+                  <Button 
+                    variant="outlined" 
+                    size="small"
+                    href={submitStatus.files.pdf}
+                    download
+                    sx={{ textAlign: 'left' }}
+                  >
+                    📥 Скачать PDF файл
+                  </Button>
+                )}
+                <Typography variant="caption" sx={{ color: '#666', mt: 1 }}>
+                  💡 Совет: Загрузите Excel файл в Google Drive для облачного хранилища
+                </Typography>
+              </Stack>
+            )}
+          </Box>
+        )}
       </Stack>
     </Paper>
   )

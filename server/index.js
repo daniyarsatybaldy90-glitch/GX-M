@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url'
 import express from 'express'
 import cors from 'cors'
 import * as XLSX from 'xlsx'
-import googleDriveService from './GoogleDriveBackendService.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -16,6 +15,7 @@ const app = express()
 app.use(cors())
 app.use(express.json({ limit: '20mb' }))
 app.use(express.static(distDir))
+app.use(express.static(submissionsDir, { prefix: '/submissions' }))
 
 app.post('/api/submit', async (req, res) => {
   const { orderJson, pdfBase64, baseUrl } = req.body || {}
@@ -110,32 +110,20 @@ app.post('/api/submit', async (req, res) => {
     const workbookBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' })
     await fs.writeFile(excelPath, workbookBuffer)
 
-    // Загружаем Excel на Google Drive
-    const excelResult = await googleDriveService.uploadExcelFile(excelFileName, workbookBuffer)
-    const excelLink = excelResult?.webViewLink || null
-
-    let pdfLink = null
     if (typeof pdfBase64 === 'string' && pdfBase64.startsWith('data:')) {
       const base64Part = pdfBase64.split(',')[1]
       if (base64Part) {
         const pdfBuffer = Buffer.from(base64Part, 'base64')
         await fs.writeFile(pdfPath, pdfBuffer)
-        
-        // Загружаем PDF на Google Drive
-        const pdfResult = await googleDriveService.uploadPdfFile(pdfFileName, pdfBuffer)
-        pdfLink = pdfResult?.webViewLink || null
       }
     }
 
-    // Store baseUrl for QR generation reference
-    const guideUrl = baseUrl ? `${baseUrl}/guide` : 'http://localhost:3000/guide'
-    const metaPath = path.join(submissionsDir, `${timestamp}-meta.txt`)
-    await fs.writeFile(metaPath, `Guide URL: ${guideUrl}\nExcel Link: ${excelLink || 'Local'}\nPDF Link: ${pdfLink || 'Local'}\n`, 'utf8')
-
     res.status(201).json({ 
       status: 'ok',
-      excelLink: excelLink || null,
-      pdfLink: pdfLink || null
+      excelFile: excelFileName,
+      excelUrl: `/submissions/${excelFileName}`,
+      pdfFile: pdfFileName,
+      pdfUrl: `/submissions/${pdfFileName}`
     })
   } catch (error) {
     console.error('Failed to store submission', error)
