@@ -18,34 +18,30 @@ export const ReleaseSchema = z.object({
 })
 
 export const OrderFormSchema = z.object({
-  customer: z.object({ name: z.string().optional(), contact: z.string().optional() }).default({ name: undefined, contact: undefined }),
-  project: z.object({ name: z.string().optional(), location: z.string().optional() }).default({ name: undefined, location: undefined }),
+  customer: z.object({ name: z.string().optional(), contact: z.string().optional() }).optional(),
+  project: z.object({ name: z.string().optional(), location: z.string().optional() }).optional(),
   base: BaseParamsSchema,
   release: ReleaseSchema,
   protections: z.array(z.string()).default([]),
-  uki: z.object({ enabled: z.boolean(), model: z.string().optional() }).superRefine((val, ctx)=>{
-    if(val.enabled && !val.model){
-      ctx.addIssue({ code:'custom', message:'Укажите модель УКИ', path:['model'] })
-    }
-  }),
+  uki: z.object({ enabled: z.boolean(), model: z.string().optional() }).optional(),
   interfaces: z.array(z.string()).default([]),
   enclosure: z.object({ 
     id: z.string(), 
     inlets: z.number().min(1).max(10),
-    material: z.enum(['carbon', 'stainless', 'explosive']).default('carbon'),
-    ip: z.string().default('IP40')
+    material: z.enum(['carbon', 'stainless', 'explosive']).optional(),
+    ip: z.string().optional()
   }),
   cabling: z.object({
-    inputLines: z.number().min(0).max(10).default(0),
+    inputLines: z.number().min(0).max(10).optional(),
     cableEntries: z.string().optional()
-  }).default({ inputLines: 0, cableEntries: undefined }),
+  }).optional(),
   controls: z.object({ 
-    buttons: z.array(z.string()), 
-    indicators: z.array(z.string()), 
-    auxContacts: z.number().min(0).max(8),
-    controlType: z.enum(['local', 'remote', 'combined']).default('local'),
-    hasHandle: z.boolean().default(false)
-  })
+    buttons: z.array(z.string()).optional(), 
+    indicators: z.array(z.string()).optional(), 
+    auxContacts: z.number().min(0).max(8).optional(),
+    controlType: z.enum(['local', 'remote', 'combined']).optional(),
+    hasHandle: z.boolean().optional()
+  }).optional()
 })
 
 export type OrderForm = z.infer<typeof OrderFormSchema>
