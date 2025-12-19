@@ -17,13 +17,35 @@ export async function renderOrderPDF(order:any): Promise<Blob>{
   doc.text(`Код: ${gxCode}`, 40, 56)
 
   const rows: any[] = []
+  
+  // Информация о заказчике
+  if(order.customer?.name || order.customer?.contact) {
+    rows.push(['', ''])
+    rows.push(['Информация о заказчике', ''])
+    if(order.customer?.name) rows.push(['Компания', order.customer.name])
+    if(order.customer?.contact) rows.push(['Контакты', order.customer.contact])
+  }
+  
+  // Информация о проекте
+  if(order.project?.name || order.project?.location) {
+    rows.push(['', ''])
+    rows.push(['Информация о проекте', ''])
+    if(order.project?.name) rows.push(['Название проекта', order.project.name])
+    if(order.project?.location) rows.push(['Локация', order.project.location])
+  }
+  
+  // Параметры устройства
+  rows.push(['', ''])
+  rows.push(['Параметры устройства', ''])
   rows.push(['Аппарат', order.device.id])
   rows.push(['Ток / Напряжение / Частота / Полюса', `${order.device.base.current}A / ${order.device.base.voltage}V / ${order.device.base.frequency}Hz / ${order.device.base.poles}`])
+  rows.push(['Отключающая способность Icu', `${order.device.base.icu}kA`])
   rows.push(['Расцепитель', order.device.release.type + (order.device.release.model? ` (${order.device.release.model})` : '')])
   rows.push(['Защиты', order.device.protections.join(', ') || '—'])
-  rows.push(['УКИ', order.device.uki.enabled ? (order.device.uki.model||'') : 'Нет'])
+  rows.push(['УКИ', order.device.uki.enabled ? (order.device.uki.model||'УКИ включено') : 'Нет'])
   rows.push(['Интерфейсы', order.device.interfaces.join(', ') || '—'])
-  rows.push(['Корпус/вводы', `${order.device.enclosure.id} / ${order.device.enclosure.inlets}`])
+  rows.push(['Корпус', `${order.device.enclosure.id}`])
+  rows.push(['Количество вводов', String(order.device.enclosure.inlets)])
   
   const controlTypeLabel = 
     order.device.controls.controlType === 'combined' ? 'Комбинированное' :
@@ -31,8 +53,14 @@ export async function renderOrderPDF(order:any): Promise<Blob>{
     'Местное'
   
   const handleLabel = order.device.controls.hasHandle ? 'Да' : 'Нет'
+  
+  // Управление и кнопки
+  rows.push(['', ''])
+  rows.push(['Управление', ''])
   rows.push(['Тип управления', controlTypeLabel])
   rows.push(['Руковатка вводного автомата', handleLabel])
+  rows.push(['Кнопки', order.device.controls.buttons?.join(', ') || '—'])
+  rows.push(['Индикаторы', order.device.controls.indicators?.join(', ') || '—'])
   rows.push(['Доп. контакты', String(order.device.controls.auxContacts)])
 
   autoTable(doc, {
