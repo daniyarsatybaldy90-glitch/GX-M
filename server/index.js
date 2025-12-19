@@ -9,7 +9,10 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const rootDir = path.join(__dirname, '..')
 const distDir = path.join(rootDir, 'dist')
-const submissionsDir = path.join(rootDir, 'submissions')
+
+// OneDrive path for automatic cloud sync
+const oneDrivePath = path.join(process.env.USERPROFILE || '', 'OneDrive', 'gx-m400-orders')
+const submissionsDir = oneDrivePath
 
 const app = express()
 app.use(cors())
