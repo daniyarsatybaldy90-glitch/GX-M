@@ -175,6 +175,7 @@ export default function ConfiguratorForm(){
   }, [gxCode])
 
   const onSubmit = async (data: OrderForm)=>{
+    console.log('✅ onSubmit called with data:', data)
     setIsSubmitting(true)
     setSubmitStatus(null)
 
@@ -507,13 +508,22 @@ export default function ConfiguratorForm(){
         <Stack direction={{ xs:'column', sm:'row' }} spacing={2}>
           <Button 
             variant="contained" 
-            onClick={handleSubmit(onSubmit)}
+            onClick={() => {
+              console.log('🔴 Validation errors:', errors)
+              handleSubmit(onSubmit)()
+            }}
             disabled={isSubmitting}
             sx={{ flex: 1 }}
           >
             {isSubmitting ? 'Сохранение заказа...' : 'Сформировать заказ'}
           </Button>
         </Stack>
+
+        {Object.keys(errors).length > 0 && (
+          <Alert severity="error">
+            ⚠️ Ошибки в форме: {JSON.stringify(errors, null, 2)}
+          </Alert>
+        )}
 
         {submitStatus && (
           <Box sx={{ 

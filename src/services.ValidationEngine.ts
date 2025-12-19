@@ -11,10 +11,6 @@ export const BaseParamsSchema = z.object({
 export const ReleaseSchema = z.object({
   type: z.enum(['TM','EN','EM']),
   model: z.string().optional()
-}).superRefine((val, ctx)=>{
-  if((val.type==='EN' || val.type==='EM') && !val.model){
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Укажите модель расцепителя', path: ['model'] })
-  }
 })
 
 export const OrderFormSchema = z.object({
