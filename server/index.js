@@ -107,7 +107,7 @@ app.post('/api/submit', async (req, res) => {
       : XLSX.utils.aoa_to_sheet([['Код', 'Наименование', 'Количество']])
     XLSX.utils.book_append_sheet(workbook, itemsSheet, 'Комплектация')
 
-    const rawSheet = XLSX.utils.aoa_to_sheet([[orderJson]])
+    const rawSheet = XLSX.utils.aoa_to_sheet([[JSON.stringify(parsedOrder)]])
     XLSX.utils.book_append_sheet(workbook, rawSheet, 'RAW')
 
     const workbookBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' })
@@ -121,7 +121,7 @@ app.post('/api/submit', async (req, res) => {
       }
     }
 
-    res.status(201).json({ 
+    res.json({ 
       status: 'ok',
       excelFile: excelFileName,
       excelUrl: `/submissions/${excelFileName}`,
