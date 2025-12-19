@@ -113,7 +113,8 @@ export default function ConfiguratorForm(){
 
   const { control, handleSubmit, watch, formState: { errors }, reset } = useForm<OrderForm>({
     resolver: zodResolver(OrderFormSchema) as unknown as Resolver<OrderForm>,
-    defaultValues: fallbackDefaults
+    defaultValues: computedDefaults,
+    mode: 'onChange'
   })
 
   useEffect(()=>{
