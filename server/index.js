@@ -4,15 +4,42 @@ import { fileURLToPath } from 'node:url'
 import express from 'express'
 import cors from 'cors'
 import * as XLSX from 'xlsx'
+import admin from 'firebase-admin'
+import dotenv from 'dotenv'
+
+// Load .env.local first, then .env
+dotenv.config({ path: path.join(process.cwd(), 'server', '.env.local') })
+dotenv.config({ path: path.join(process.cwd(), '.env') })
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const rootDir = path.join(__dirname, '..')
 const distDir = path.join(rootDir, 'dist')
 
-// OneDrive path for automatic cloud sync
-const oneDrivePath = path.join(process.env.USERPROFILE || '', 'OneDrive', 'gx-m400-orders')
-const submissionsDir = oneDrivePath
+// Initialize Firebase Admin
+const serviceAccount = {
+  type: process.env.FIREBASE_TYPE,
+  project_id: process.env.FIREBASE_PROJECT_ID,
+  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+  private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  client_id: process.env.FIREBASE_CLIENT_ID,
+  auth_uri: process.env.FIREBASE_AUTH_URI,
+  token_uri: process.env.FIREBASE_TOKEN_URI,
+  auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_CERT_URL,
+  client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL,
+}
+
+try {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  })
+} catch (error) {
+  console.log('Firebase already initialized or not configured')
+}
+
+const bucket = admin.storage().bucket()
 
 const app = express()
 app.use(cors())
@@ -39,12 +66,8 @@ app.post('/api/submit', async (req, res) => {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
   const excelFileName = `${timestamp}-order.xlsx`
   const pdfFileName = `${timestamp}-order.pdf`
-  const excelPath = path.join(submissionsDir, excelFileName)
-  const pdfPath = path.join(submissionsDir, pdfFileName)
 
   try {
-    await fs.mkdir(submissionsDir, { recursive: true })
-
     const workbook = XLSX.utils.book_new()
     const order = parsedOrder || {}
     const device = order.device || {}
@@ -111,22 +134,44 @@ app.post('/api/submit', async (req, res) => {
     XLSX.utils.book_append_sheet(workbook, rawSheet, 'RAW')
 
     const workbookBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' })
-    await fs.writeFile(excelPath, workbookBuffer)
 
+    // Upload Excel to Firebase Storage
+    const excelFile = bucket.file(`submissions/${excelFileName}`)
+    const excelSignedUrl = await new Promise((resolve, reject) => {
+      excelFile.save(workbookBuffer, {
+        metadata: { contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
+      }, async (error) => {
+        if (error) return reject(error)
+        const [url] = await excelFile.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 7 * 24 * 60 * 60 * 1000 })
+        resolve(url)
+      })
+    })
+
+    // Upload PDF to Firebase Storage if provided
+    let pdfSignedUrl = null
     if (typeof pdfBase64 === 'string' && pdfBase64.startsWith('data:')) {
       const base64Part = pdfBase64.split(',')[1]
       if (base64Part) {
         const pdfBuffer = Buffer.from(base64Part, 'base64')
-        await fs.writeFile(pdfPath, pdfBuffer)
+        const pdfFile = bucket.file(`submissions/${pdfFileName}`)
+        pdfSignedUrl = await new Promise((resolve, reject) => {
+          pdfFile.save(pdfBuffer, {
+            metadata: { contentType: 'application/pdf' }
+          }, async (error) => {
+            if (error) return reject(error)
+            const [url] = await pdfFile.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 7 * 24 * 60 * 60 * 1000 })
+            resolve(url)
+          })
+        })
       }
     }
 
     res.json({ 
       status: 'ok',
       excelFile: excelFileName,
-      excelUrl: `/submissions/${excelFileName}`,
+      excelUrl: excelSignedUrl,
       pdfFile: pdfFileName,
-      pdfUrl: `/submissions/${pdfFileName}`
+      pdfUrl: pdfSignedUrl
     })
   } catch (error) {
     console.error('Failed to store submission', error)
