@@ -4,7 +4,7 @@ export const BaseParamsSchema = z.object({
   current: z.number(),
   voltage: z.number(),
   frequency: z.number(),
-  poles: z.enum(['3P','4P']),
+  poles: z.enum(['1P', '1P+N', '2P', '3P', '4P', '3P+N']),
   icu: z.number().optional()
 })
 
@@ -18,8 +18,8 @@ export const ReleaseSchema = z.object({
 })
 
 export const OrderFormSchema = z.object({
-  customer: z.object({ name: z.string().min(1,'Укажите название организации').optional(), contact: z.string().optional() }).optional(),
-  project: z.object({ name: z.string().optional(), location: z.string().optional() }).optional(),
+  customer: z.object({ name: z.string().optional(), contact: z.string().optional() }).optional().default({}),
+  project: z.object({ name: z.string().optional(), location: z.string().optional() }).optional().default({}),
   base: BaseParamsSchema,
   release: ReleaseSchema,
   protections: z.array(z.string()).default([]),
@@ -38,7 +38,7 @@ export const OrderFormSchema = z.object({
   cabling: z.object({
     inputLines: z.number().min(0).max(10).default(0),
     cableEntries: z.string().optional()
-  }).optional(),
+  }).optional().default({}),
   controls: z.object({ 
     buttons: z.array(z.string()), 
     indicators: z.array(z.string()), 

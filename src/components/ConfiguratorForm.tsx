@@ -64,7 +64,9 @@ export default function ConfiguratorForm(){
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const fallbackDefaults = useMemo<OrderForm>(()=>({
-    base: { current: 400, voltage: 690, frequency: 50, poles: '3P', icu: 50 },
+    customer: { name: undefined, contact: undefined },
+    project: { name: undefined, location: undefined },
+    base: { current: 400, voltage: 690, frequency: 50, poles: '3P' as const, icu: 50 },
     release: { type: 'TM' },
     protections: [],
     uki: { enabled: false, model: undefined },
