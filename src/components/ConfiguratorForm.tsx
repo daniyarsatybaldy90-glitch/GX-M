@@ -171,8 +171,19 @@ export default function ConfiguratorForm(){
     setSubmitStatus(null)
 
     try {
+      // Переосчитываем gxCode с актуальными данными формы
+      const actualGxCode = mapOrderToGXCode({
+        device: {
+          base: data.base,
+          release: data.release,
+          enclosure: data.enclosure,
+          controls: data.controls,
+          interfaces: data.interfaces
+        }
+      })
+      
       const items: OrderItem[] = [
-        { code: gxCode, name: `Автоматический выключатель ${gxCode}`, qty: 1 }
+        { code: actualGxCode, name: `Автоматический выключатель ${actualGxCode}`, qty: 1 }
       ]
 
       const order: OrderPayload = {
@@ -181,7 +192,7 @@ export default function ConfiguratorForm(){
         customer: data.customer,
         project: data.project,
         device: {
-          id: gxCode,
+          id: actualGxCode,
           base: data.base,
           release: data.release,
           protections: data.protections,
