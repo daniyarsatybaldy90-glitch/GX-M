@@ -440,8 +440,18 @@ export default function ConfiguratorForm(){
           <Controller name="enclosure.id" control={control} render={({ field })=>(
             <TextField select label="Тип корпуса" {...field} fullWidth sx={{ minWidth: 200 }}>
               {(enclosures?.items||[]).map((e:any)=>(
-                <MenuItem key={e.id} value={e.id}>{(e.title||e.id)} • {e.ip}</MenuItem>
+                <MenuItem key={e.id} value={e.id}>{(e.title||e.id)}</MenuItem>
               ))}
+            </TextField>
+          )}/>
+          <Controller name="enclosure.ip" control={control} render={({ field })=>(
+            <TextField select label="Степень защиты (IP)" {...field} fullWidth sx={{ minWidth: 150 }}>
+              <MenuItem value="IP40">IP40</MenuItem>
+              <MenuItem value="IP54">IP54</MenuItem>
+              <MenuItem value="IP55">IP55</MenuItem>
+              <MenuItem value="IP56">IP56</MenuItem>
+              <MenuItem value="IP65">IP65</MenuItem>
+              <MenuItem value="IP66">IP66</MenuItem>
             </TextField>
           )}/>
         </Stack>
