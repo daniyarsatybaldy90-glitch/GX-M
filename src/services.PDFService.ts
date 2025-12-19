@@ -44,8 +44,24 @@ export async function renderOrderPDF(order:any): Promise<Blob>{
   rows.push(['Защиты', order.device.protections.join(', ') || '—'])
   rows.push(['УКИ', order.device.uki.enabled ? (order.device.uki.model||'УКИ включено') : 'Нет'])
   rows.push(['Интерфейсы', order.device.interfaces.join(', ') || '—'])
-  rows.push(['Корпус', `${order.device.enclosure.id}`])
-  rows.push(['Количество вводов', String(order.device.enclosure.inlets)])
+  
+  // Исполнение корпуса
+  const materialMap: {[key: string]: string} = {
+    'carbon': 'Корпус из листовой стали (стандартное)',
+    'stainless': 'Корпус из нержавеющей стали',
+    'explosive': 'Взрывозащищённый корпус (Ex-исполнение)'
+  }
+  const materialLabel = materialMap[order.device.enclosure.material] || 'Корпус из листовой стали'
+  rows.push(['Исполнение корпуса', materialLabel])
+  rows.push(['Тип корпуса', `${order.device.enclosure.id}`])
+  rows.push(['Степень защиты', order.device.enclosure.ip || 'IP40'])
+  
+  // Кабельные вводы
+  rows.push(['', ''])
+  rows.push(['Кабельные вводы и отходящие линии', ''])
+  rows.push(['Количество вводов питания', String(order.device.enclosure.inlets)])
+  if(order.cabling?.inputLines) rows.push(['Количество отходящих линий', String(order.cabling.inputLines)])
+  if(order.cabling?.cableEntries) rows.push(['Кабельные вводы (сальники)', order.cabling.cableEntries])
   
   const controlTypeLabel = 
     order.device.controls.controlType === 'combined' ? 'Комбинированное' :

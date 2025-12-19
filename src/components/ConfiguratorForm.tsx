@@ -69,7 +69,8 @@ export default function ConfiguratorForm(){
     protections: [],
     uki: { enabled: false, model: undefined },
     interfaces: [],
-    enclosure: { id: 'NM8N-400', inlets: 1 },
+    enclosure: { id: 'NM8N-400', inlets: 1, material: 'carbon', ip: 'IP40' },
+    cabling: { inputLines: 0, outputLines: 0, cableEntries: undefined },
     controls: { buttons: ['ON', 'OFF'], indicators: ['Trip'], auxContacts: 0, controlType: 'local', hasHandle: false }
   }), [])
 
@@ -427,17 +428,36 @@ export default function ConfiguratorForm(){
 
         <Divider />
 
-        <Typography variant="h6">Корпус и вводы</Typography>
+        <Typography variant="h6">Исполнение корпуса (оболочки)</Typography>
         <Stack direction={{ xs:'column', sm:'row' }} spacing={2}>
+          <Controller name="enclosure.material" control={control} render={({ field })=>(
+            <TextField select label="Материал корпуса" {...field} fullWidth sx={{ minWidth: 250 }}>
+              <MenuItem value="carbon">Корпус из листовой стали (стандартное исполнение)</MenuItem>
+              <MenuItem value="stainless">Корпус из нержавеющей стали</MenuItem>
+              <MenuItem value="explosive">Взрывозащищённый корпус (Ex-исполнение)</MenuItem>
+            </TextField>
+          )}/>
           <Controller name="enclosure.id" control={control} render={({ field })=>(
-            <TextField select label="Исполнение корпуса" {...field} fullWidth sx={{ minWidth: 200 }}>
+            <TextField select label="Тип корпуса" {...field} fullWidth sx={{ minWidth: 200 }}>
               {(enclosures?.items||[]).map((e:any)=>(
                 <MenuItem key={e.id} value={e.id}>{(e.title||e.id)} • {e.ip}</MenuItem>
               ))}
             </TextField>
           )}/>
+        </Stack>
+
+        <Divider />
+
+        <Typography variant="h6">Кабельные вводы и отходящие линии</Typography>
+        <Stack direction={{ xs:'column', sm:'row' }} spacing={2}>
           <Controller name="enclosure.inlets" control={control} render={({ field })=>(
-            <TextField type="number" label="Количество вводов" inputProps={{ min:1, max:4 }} {...field} fullWidth sx={{ minWidth: 150 }} />
+            <TextField type="number" label="Количество вводов питания (входных линий)" inputProps={{ min:1, max:10 }} {...field} fullWidth sx={{ minWidth: 200 }} />
+          )}/>
+          <Controller name="cabling.inputLines" control={control} render={({ field })=>(
+            <TextField type="number" label="Количество отходящих линий" inputProps={{ min:0, max:10 }} {...field} fullWidth sx={{ minWidth: 200 }} />
+          )}/>
+          <Controller name="cabling.cableEntries" control={control} render={({ field })=>(
+            <TextField label="Кабельные вводы (тип и количество сальников)" placeholder="Например: М20x1.5 (2 шт.)" {...field} fullWidth sx={{ minWidth: 250 }} />
           )}/>
         </Stack>
 
