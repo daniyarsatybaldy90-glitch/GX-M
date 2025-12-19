@@ -12,7 +12,7 @@ export async function renderOrderPDF(order:any): Promise<Blob>{
   doc.setFontSize(14)
   
   const gxCode = mapOrderToGXCode(order)
-  doc.text(`GX-M400 — Определение конфигурации`, 40, 40)
+  doc.text(`Конфигурация комплектного устройства рудничного исполнения GX-M`, 40, 40)
   doc.setFontSize(12)
   doc.text(`Код: ${gxCode}`, 40, 56)
 
