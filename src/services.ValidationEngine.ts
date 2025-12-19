@@ -31,13 +31,12 @@ export const OrderFormSchema = z.object({
   interfaces: z.array(z.string()).default([]),
   enclosure: z.object({ 
     id: z.string(), 
-    inlets: z.number().min(1).max(4),
+    inlets: z.number().min(1).max(10),
     material: z.enum(['carbon', 'stainless', 'explosive']).default('carbon'),
     ip: z.string().default('IP40')
   }),
   cabling: z.object({
     inputLines: z.number().min(0).max(10).default(0),
-    outputLines: z.number().min(0).max(10).default(0),
     cableEntries: z.string().optional()
   }).optional(),
   controls: z.object({ 
