@@ -103,7 +103,9 @@ export default function ConfiguratorForm(){
       enclosure: {
         ...fallbackDefaults.enclosure,
         id: firstEnclosure?.id ?? fallbackDefaults.enclosure.id
-      }
+      },
+      cabling: fallbackDefaults.cabling,
+      controls: fallbackDefaults.controls
     }
   }, [devices, enclosures])
 
