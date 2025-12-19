@@ -98,7 +98,7 @@ export default function ConfiguratorForm(){
         current: primaryDevice?.currents?.[0] ?? fallbackDefaults.base.current,
         voltage: primaryDevice?.voltages?.[0] ?? fallbackDefaults.base.voltage,
         frequency: primaryDevice?.frequencies?.[0] ?? fallbackDefaults.base.frequency,
-        poles: (primaryDevice?.poles?.[0] ?? fallbackDefaults.base.poles) as '3P' | '4P',
+        poles: (primaryDevice?.poles?.[0] ?? fallbackDefaults.base.poles) as '3P' | '4P' | '1P' | '1P+N' | '2P' | '3P+N',
         icu: primaryDevice?.icu?.[0]
       },
       release: { type: fallbackDefaults.release.type },
@@ -113,13 +113,15 @@ export default function ConfiguratorForm(){
 
   const { control, handleSubmit, watch, formState: { errors }, reset } = useForm<OrderForm>({
     resolver: zodResolver(OrderFormSchema) as unknown as Resolver<OrderForm>,
-    defaultValues: computedDefaults,
-    mode: 'onChange'
+    defaultValues: computedDefaults ?? fallbackDefaults,
+    mode: 'onBlur'
   })
 
   useEffect(()=>{
-    reset(computedDefaults)
-  }, [computedDefaults, reset])
+    if(computedDefaults && devices && enclosures) {
+      reset(computedDefaults)
+    }
+  }, [computedDefaults, reset, devices, enclosures])
 
   const releaseType = watch('release.type')
   const ukiEnabled = watch('uki.enabled')
