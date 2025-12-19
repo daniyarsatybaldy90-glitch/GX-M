@@ -8,8 +8,6 @@ import { loadJson } from '../services.CatalogService'
 import { renderOrderPDF } from '../services.PDFService'
 import { downloadText, downloadBlob } from '../utils.download'
 import { mapOrderToGXCode } from '../services.CodeGenerator'
-import { googleDriveService } from '../services.GoogleDriveService'
-import { GoogleAuthComponent } from './GoogleAuthComponent'
 import {
   Box, Paper, Stack, Typography, Divider, Button, TextField, MenuItem, FormControlLabel,
   Checkbox, Switch, Select, InputLabel, FormControl, OutlinedInput, Chip, Tooltip, Alert
@@ -258,11 +256,6 @@ export default function ConfiguratorForm(){
     <Paper elevation={1} sx={{ p: 2 }}>
       <Stack spacing={2}>
         
-        {/* Google Drive Auth */}
-        <Box sx={{ p: 2, bgcolor: '#fafafa', borderRadius: 1, border: '1px solid #e0e0e0' }}>
-          <GoogleAuthComponent />
-        </Box>
-
         {/* Submission Status */}
         {submitStatus && (
           <Alert severity={submitStatus.type} onClose={() => setSubmitStatus(null)}>
@@ -508,9 +501,6 @@ export default function ConfiguratorForm(){
                     📥 Скачать PDF файл
                   </Button>
                 )}
-                <Typography variant="caption" sx={{ color: '#666', mt: 1 }}>
-                  💡 Совет: Загрузите Excel файл в Google Drive для облачного хранилища
-                </Typography>
               </Stack>
             )}
           </Box>
