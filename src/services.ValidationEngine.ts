@@ -18,8 +18,8 @@ export const ReleaseSchema = z.object({
 })
 
 export const OrderFormSchema = z.object({
-  customer: z.object({ name: z.string().optional(), contact: z.string().optional() }).optional().default({}),
-  project: z.object({ name: z.string().optional(), location: z.string().optional() }).optional().default({}),
+  customer: z.object({ name: z.string().optional(), contact: z.string().optional() }).default({ name: undefined, contact: undefined }),
+  project: z.object({ name: z.string().optional(), location: z.string().optional() }).default({ name: undefined, location: undefined }),
   base: BaseParamsSchema,
   release: ReleaseSchema,
   protections: z.array(z.string()).default([]),
@@ -38,7 +38,7 @@ export const OrderFormSchema = z.object({
   cabling: z.object({
     inputLines: z.number().min(0).max(10).default(0),
     cableEntries: z.string().optional()
-  }).optional().default({}),
+  }).default({ inputLines: 0, cableEntries: undefined }),
   controls: z.object({ 
     buttons: z.array(z.string()), 
     indicators: z.array(z.string()), 
