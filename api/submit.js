@@ -1,22 +1,17 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import express from 'express'
-import cors from 'cors'
 import * as XLSX from 'xlsx'
 import dotenv from 'dotenv'
 
-// Load environment variables
 dotenv.config({ path: path.join(process.cwd(), '.env.local') })
 dotenv.config({ path: path.join(process.cwd(), '.env') })
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const rootDir = path.join(__dirname, '..')
-const distDir = path.join(rootDir, 'dist')
 const submissionsDir = path.join(rootDir, 'submissions')
 
-// Initialize Firebase Admin (optional)
 let bucket = null
 const useFirebase = !!process.env.FIREBASE_PROJECT_ID
 
@@ -42,26 +37,31 @@ async function initializeFirebase() {
         storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
       })
       bucket = admin.storage().bucket()
-      console.log('✅ Firebase Storage initialized')
     } catch (error) {
-      console.log('⚠️ Firebase not configured')
+      console.log('Firebase not available')
     }
   }
 }
 
-// Initialize Express
-const app = express()
-app.use(cors())
-app.use(express.json({ limit: '50mb' }))
-app.use(express.urlencoded({ limit: '50mb', extended: true }))
+await initializeFirebase()
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
-})
+export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Credentials', 'true')
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version')
 
-// Submit API
-app.post('/api/submit', async (req, res) => {
+  if (req.method === 'OPTIONS') {
+    res.status(200).end()
+    return
+  }
+
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' })
+    return
+  }
+
   const { orderJson, pdfBase64, baseUrl } = req.body || {}
 
   if (typeof orderJson !== 'string') {
@@ -164,7 +164,7 @@ app.post('/api/submit', async (req, res) => {
         }
       }
 
-      res.json({ 
+      res.status(200).json({ 
         status: 'ok',
         excelFile: excelFileName,
         excelUrl: excelSignedUrl,
@@ -172,38 +172,15 @@ app.post('/api/submit', async (req, res) => {
         pdfUrl: pdfSignedUrl
       })
     } else {
-      try {
-        await fs.mkdir(submissionsDir, { recursive: true })
-        const excelPath = path.join(submissionsDir, excelFileName)
-        await fs.writeFile(excelPath, workbookBuffer)
-
-        if (typeof pdfBase64 === 'string' && pdfBase64.startsWith('data:')) {
-          const base64Part = pdfBase64.split(',')[1]
-          if (base64Part) {
-            const pdfBuffer = Buffer.from(base64Part, 'base64')
-            const pdfPath = path.join(submissionsDir, pdfFileName)
-            await fs.writeFile(pdfPath, pdfBuffer)
-          }
-        }
-      } catch (writeError) {
-        console.log('Local file storage not available on Vercel, using memory response')
-      }
-
-      res.json({ 
+      res.status(200).json({ 
         status: 'ok',
         excelFile: excelFileName,
         pdfFile: pdfFileName,
-        message: 'Submission stored'
+        message: 'Submission received'
       })
     }
   } catch (error) {
-    console.error('Failed to store submission', error)
-    res.status(500).json({ error: 'Failed to store submission: ' + error.message })
+    console.error('Failed to process submission', error)
+    res.status(500).json({ error: 'Failed to process submission: ' + error.message })
   }
-})
-
-// Initialize Firebase then export for Vercel
-await initializeFirebase()
-
-export default app
-
+}
