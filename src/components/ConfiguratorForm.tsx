@@ -38,6 +38,7 @@ type OrderPayload = {
   }
   items: OrderItem[]
   meta: { createdAt: string; userAgent: string; hash?: string }
+  additionalRequirements?: string
 }
 
 const blobToDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
@@ -212,7 +213,8 @@ export default function ConfiguratorForm(){
           controls: data.controls
         },
         items,
-        meta: { createdAt: new Date().toISOString(), userAgent: navigator.userAgent }
+        meta: { createdAt: new Date().toISOString(), userAgent: navigator.userAgent },
+        additionalRequirements: data.additionalRequirements
       }
 
       const enc = new TextEncoder().encode(JSON.stringify(order))
