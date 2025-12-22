@@ -79,6 +79,12 @@ export async function renderOrderPDF(order:any): Promise<Blob>{
   rows.push(['Индикаторы', order.device.controls.indicators?.join(', ') || '—'])
   rows.push(['Доп. контакты', String(order.device.controls.auxContacts)])
 
+  // Дополнительные требования
+  if(order.additionalRequirements?.trim()) {
+    rows.push(['', ''])
+    rows.push(['Дополнительные требования', order.additionalRequirements])
+  }
+
   autoTable(doc, {
     startY: 75,
     head: [['Параметр','Значение']],

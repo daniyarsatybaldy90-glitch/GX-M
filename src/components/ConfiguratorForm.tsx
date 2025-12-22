@@ -73,7 +73,8 @@ export default function ConfiguratorForm(){
     interfaces: [],
     enclosure: { id: 'NM8N-400', inlets: 1, material: 'carbon', ip: 'IP40' },
     cabling: { inputLines: 0, outputLines: 0, cableEntries: undefined },
-    controls: { buttons: ['ON', 'OFF'], indicators: ['Trip'], auxContacts: 0, controlType: 'local', hasHandle: false }
+    controls: { buttons: ['ON', 'OFF'], indicators: ['Trip'], auxContacts: 0, controlType: 'local', hasHandle: false },
+    additionalRequirements: undefined
   }), [])
 
   useEffect(()=>{
@@ -529,6 +530,21 @@ export default function ConfiguratorForm(){
             />
           )}/>
         </Stack>
+
+        <Divider />
+
+        <Typography variant="h6">Дополнительные требования</Typography>
+        <Controller name="additionalRequirements" control={control} render={({ field })=>(
+          <TextField 
+            {...field}
+            label="Дополнительные требования / пожелания заказчика"
+            multiline
+            rows={4}
+            placeholder="Укажите любые дополнительные требования, пожелания или особые условия для вашего заказа..."
+            fullWidth
+            value={field.value || ''}
+          />
+        )}/>
 
         <Divider />
 

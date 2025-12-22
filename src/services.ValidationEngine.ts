@@ -37,7 +37,8 @@ export const OrderFormSchema = z.object({
     auxContacts: z.number().min(0).max(8).optional(),
     controlType: z.enum(['local', 'remote', 'combined']).optional(),
     hasHandle: z.boolean().optional()
-  }).optional()
+  }).optional(),
+  additionalRequirements: z.string().optional()
 })
 
 export type OrderForm = z.infer<typeof OrderFormSchema>
